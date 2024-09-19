@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Cloud Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        textarea {
+            width: 300px;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        #wordcloud {
+            width: 600px;
+            height: 400px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Word Cloud Generator</h1>
+    <textarea id="wordInput" placeholder="Enter words, one per line"></textarea>
+    <button onclick="generateWordCloud()">Generate Word Cloud</button>
+    <div id="wordcloud"></div>
+
+    <script>
+        function generateWordCloud() {
+            const words = document.getElementById('wordInput').value.split('\n').filter(word => word.trim() !== '');
+            
+            const layout = d3.layout.cloud()
+                .size([600, 400])
+                .words(words.map(word => ({ text: word, size: 20 + Math.random() * 30 })))
+                .padding(5)
+                .rotate(() => (~~(Math.random() * 6) - 3) * 30)
+                .font("Arial")
+                .fontSize(d => d.size)
+                .on("end", draw);
+
+            layout.start();
+        }
+
+        function draw(words) {
+            d3.select("#wordcloud").html("");
+            d3.select("#wordcloud")
+                .append("svg")
+                .attr("width", 600)
+                .attr("height", 400)
+                .append("g")
+                .attr("transform", "translate(300,200)")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", d => `${d.size}px`)
+                .style("font-family", "Arial")
+                .style("fill", () => `hsl(${Math.random() * 360}, 70%, 50%)`)
+                .attr("text-anchor", "middle")
+                .attr("transform", d => `translate(${[d.x, d.y]})rotate(${d.rotate})`)
+                .text(d => d.text);
+        }
+    </script>
+</body>
+</html>
